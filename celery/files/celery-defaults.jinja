@@ -1,0 +1,28 @@
+{% from "celery/macros.sls" import render_config with context %}
+CELERY_BIN="/usr/local/bin/celery"
+CELERY_PID_FILE="{{ pid_file }}"
+CELERY_LOG_FILE="{{ log_dir }}/%N.log"
+CELERY_LOG_LEVEL="INFO"
+{#
+{% if config is defined and 'celery' in config -%}
+{% for k,v in config['celery'].items() -%}
+{% if k not in ['annotations', 'accept_content', 'imports'] -%}
+{{ render_config('celery_%s'|format(k), v) }}
+{%- endif -%}
+{% endfor -%}
+{% endif -%}
+
+{%- if config is defined and 'broker' in config -%}
+{% for k,v in config['broker'].items() -%}
+{{ render_config('broker_%s'|format(k), v) }}
+{%- endfor -%}
+{% endif %}
+
+{% if config is defined and 'celeryd' in config -%}
+{% for k,v in config['broker'].items() -%}
+{% if k not in ['app', 'enabled', 'concurrency'] -%}
+{{ render_config('celeryd_%s'|format(k), v) }}
+{%- endif -%}
+{% endfor -%}
+{% endif %}
+#}

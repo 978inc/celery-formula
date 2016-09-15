@@ -1,0 +1,7 @@
+name: celery
+os: RedHat, Debian, Ubuntu, Suse, FreeBSD
+os_family: RedHat, Debian, Suse, FreeBSD
+version: 201606
+release: 1
+summary: Formula for installing Celery
+description: Formula for installing the Celery distributed task queue

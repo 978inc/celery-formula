@@ -1,0 +1,35 @@
+#!jinja
+# This file is managed by Saltstack, any changes will be overwritten!!
+{% from "celery/map.jinja" import celery with context -%}
+{% set CMD = "/usr/local/bin/celery multi" -%}
+{% set FLAGS = [
+  "--pidfile=${CELERY_PID_FILE}",
+  "--loglevel=${CELERY_LOG_LEVEL}",
+  "--logfile=${CELERY_LOG_FILE}"
+  ]|join(" ") %}
+{% set queue_names = ['default'] -%}
+{% for svc in queue_config %}{% do queue_names.append(svc['name']) %}{% endfor -%}
+
+[Unit]
+Description=Celery Worker Daemon - {{ service_name|upper|replace("-", "_") }}
+After=network.target
+
+
+[Service]
+Type=forking
+User={{ user|default('celery') }}
+Group={{ user|default('celery')  }}
+# StandardOutput={{ celery.log_dir }}/{{ celery.service }}.log
+# StandardError={{ celery.log_dir }}/{{ celery.service }}-error.log
+EnvironmentFile=/etc/default/{{ service_name }}
+Environment=CELERYD_NODES={{ celery.total_workers }}
+WorkingDirectory={{ working_dir }}
+
+ExecStart={{ CMD }} start {{ celery.total_workers }} {% for svc in queue_config %} -Q:{{ loop.index }} {{ svc['name'] }} -c:{{ loop.index }} {{ svc['concurrency'] }} {% endfor %}  {{ FLAGS }}
+
+ExecStop={{ CMD }} stopwait {{ queue_names|join(' ') }} {{ FLAGS }}
+
+ExecReload={{ CMD }} restart {{ queue_names|join(' ') }} {{ FLAGS }}
+
+[Install]
+WantedBy=multi-user.target

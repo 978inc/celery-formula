@@ -1,0 +1,31 @@
+celery:
+  lookup:
+    version: 3.1.23
+    log_dir: /var/log/celery
+    broker: redis
+    total_workers: 4
+  worker_queues:
+    - name: 'notfast'
+      opts: {batch_size: 5}
+      concurrency: 1
+
+    - name: 'superfast'
+      opts: {batch_size: 100, prefetch_multiplier: 10}
+      concurrency: 3
+
+  config:
+    celeryd:
+      batch_size: 10
+      
+    broker:
+      url: 'redis://localhost:6379/0'
+      transport_opts:
+        fanout_prefix: true
+        fanout_patterns: true
+        visibility_timeout: 43200
+    
+    celery:
+      enable_utc: true
+      timezone: 'UTC'
+      result_backend: 'redis://localhost:6379/1'
+      annotations: { '*': { 'rate_limit': '10/s' }}
