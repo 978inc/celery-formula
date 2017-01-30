@@ -18,7 +18,7 @@ Available states
 
 ``celery``
 ------------
-Installs celery library and commands
+Installs the Celery library and executables
 
 ``celery.worker``
 ------------------
@@ -27,11 +27,11 @@ Creates a systemd service for running Celery Workers
 `celery.worker_queues` is a list of maps which contain four keys: `name`, `concurrency` and `opts`.
 - `name` controls the name of the queue
 - `concurrency` controls how many worker processes per queue
-- `opts` is a map where the keys are mapped to `CELERYD_` environment variables 
+- `opts` is a map where the keys are mapped to environment variables prefixed with **CELERYD_**
 
 ``celery.debug``
 -----------------
-Helpful for debugging, dumps the jinja map to a text file
+Helpful for debugging, dumps the jinja map to a text file in **/tmp**
 
 
 
