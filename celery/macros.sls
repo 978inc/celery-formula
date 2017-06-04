@@ -1,16 +1,17 @@
+#!jinja
 {% macro displayer(name, thing) %}
 {%- if thing is mapping -%}
 {% for k,v in thing.items() -%}
 {{ displayer('%s_%s'|format(name, k), v) }}
 {% endfor -%}
 {% elif thing is string -%}
-{{ name|upper }}={{ thing }}
+{{ name|lower }} = {{ thing|json }}
 {% elif thing is sequence -%}
-{{ name|upper }}={{ thing|json }}
+{{ name|lower }} = {{ thing|json }}
 {% elif thing == True or thing == False %}
-{{ name|upper }}={{ thing|lower }}
+{{ name|lower }} = {{ thing|capitalize }}
 {% elif thing != None  -%}
-{{ name|upper }}={{ thing }}
+{{ name|lower }} = {{ thing|json }}
 {% else -%}
 ## {{ name }} is UNDEFINED
 {% endif -%}
