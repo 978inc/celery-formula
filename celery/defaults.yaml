@@ -1,12 +1,15 @@
 {% load_yaml as lookup_map %}
 default:
-  version: '3.1.23'
+  version: '4.0.2'
   source_hash: 'sha256=2c38b56599edb0a23725dc750d689100fba8519e4de2542146d351e346dfb5c3'
   service: 'celeryd'
-  build_dir: /usr/local/src/celery
-  working_dir: /tmp/celery/working
-  run_dir: /var/run/celery
-  log_dir: /tmp/celery/log
+  
+  build_dir: /usr/local/src/celery    # 
+  working_dir: /tmp/celery/working    # 
+  config_dir: /etc/celery             # location of broker and worker configfiles
+  run_dir: /var/run/celery            # location of pid file
+  log_dir: /tmp/celery/log            # logging
+  
   broker: redis
   user: 'celery'
   
@@ -30,7 +33,7 @@ use_ssl: ~
 {% endload %}
 ## EOF Broker
 
-{% load_yaml as celeryd_defaults %}
+{% load_yaml as worker_defaults %}
 # Concurrency - change this to add more threads on each worker
 concurrency: 1
 # messages per thread to prefetch
@@ -65,21 +68,26 @@ serializer: json
 
 ## Task config options
 {% load_yaml as task_defaults %}
-acks_late: false                # if true, ack happens after task is complete.
-reject_on_worker_lost: false    # if true, will re-queue tasks even if acks_late is true
-always_eager: false             # send tasks to the queue. If true, exec tasks locally
-eager_propagates: true          # let worker exceptions bubble up
-remote_tracebacks: true         # capture worker stack traces
-track_started: true             # track started
+# if true, ack happens after task is complete.
+acks_late: False
+# if true, will re-queue tasks even if acks_late is true
+reject_on_worker_lost: false
+# send tasks to the queue. If true, exec tasks locally
+always_eager: false
+# let worker exceptions bubble up
+eager_propagates: true
+# capture worker stack traces
+remote_tracebacks: true
+# track started
+track_started: true
 
-annotations: {'*': {'rate_limit': '10/s'}}
-compression: gzip
+annotations: ~
+compression: 'gzip'
 create_missing_queues: true
 default_delivery_mode: persistent
 default_queue: celery
 default_rate_limit: ~
 default_routing_key: ~
-
 
 ignore_result: ~
 publish_retry: ~
@@ -91,12 +99,11 @@ serializer: ~
 {% endload %}
 
 {% load_yaml as default_config %}
-beat: {{ beat_options }}
+beat: {{ beat_defaults }}
 broker: {{ broker_defaults }}
-worker: {{ celeryd_defaults }}
+worker: {{ worker_defaults }}
 task: {{ task_defaults }}
 result: {{ result_defaults }}
-
   
 redis_db: 0
 redis_host: localhost

@@ -4,10 +4,11 @@
 {% set _pillar = salt['pillar.get']('celery:lookup', _grains, merge=True) %}
 
 {% set celery = salt['grains.filter_by'](lookup_map, merge=_pillar, base='default')  %}
+
 {% set config = {
-'broker': salt['pillar.get']('celery:config:broker', dc.broker, merge=True),
-'celery': salt['pillar.get']('celery:config:celery', dc.celery, merge=True),
-'celeryd': salt['pillar.get']('celery:config:celeryd', dc.celeryd, merge=True)
-} %}
+  'broker': salt['pillar.get']('celery:config:broker', dc.broker, merge=True),
+	'task': salt['pillar.get']('celery:config:task', dc.task, merge=True),
+	'worker': salt['pillar.get']('celery:config:worker', dc.worker, merge=True)
+	} %}
 
 {% do celery.update({'config': config}) %}
