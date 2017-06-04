@@ -14,17 +14,24 @@ Debian: {}
 RedHat: {}
 {% endload %}
 
+# Broker configuration
 {% load_yaml as broker_defaults %}
 url: 'redis://'
 pool_limit: 10
 connection:
-  timeout: 4
   retry: true
-  max_retires: 50
+  timeout: 60
+  max_retries: 10
+failover_strategy: ~
+heartbeat: ~
+login_method: ~
+pool_limit: ~
+use_ssl: ~
 {% endload %}
+## EOF Broker
 
 {% load_yaml as celeryd_defaults %}
-# Concurrency - change this to add more threads
+# Concurrency - change this to add more threads on each worker
 concurrency: 1
 # messages per thread to prefetch
 prefetch_multiplier: 1
@@ -33,30 +40,73 @@ max_tasks_per_child: 1
 task_time_limit: 3600
 {% endload %}
 
-{% load_yaml as celery_defaults %}
-result_backend: 'redis'
-redis_max_connections: 50
-message_compression: 'gzip'
-accept_content: ['json', 'msgpack']
-task:
-  # only keep task results for 7 days
-  result_expires: {{ 86400 * 7 }}
-  serializer: 'msgpack'
+## Celerybeat configuration options
+{% load_yaml as beat_defaults %}
+max_loop_interval: ~
+schedule: ~
+scheduler: ~
+schedule_filename: ~
+sync_every: ~
+{% endload %}
+## EOF Celerybeat
 
-imports: []
-enable_utc: true
-#celery_timezone: 'US/Eastern'
+## Result backend configuration
+{% load_yaml as result_defaults %}
+compression: gzip
+backend: filesystem
+cache_max: ~
+exchange: ~
+exchange_type: ~
+expires: ~
+persistent: ~
+serializer: json
+{% endload %}
+## EOF Result
 
-# allows for task.retry (but they need to be idempotent)
-acks_late: true
-# propagate exceptions within chords
-chord_propagate: true
-# write down when the task was started by a worker
-track_started: true
+## Task config options
+{% load_yaml as task_defaults %}
+acks_late: false                # if true, ack happens after task is complete.
+reject_on_worker_lost: false    # if true, will re-queue tasks even if acks_late is true
+always_eager: false             # send tasks to the queue. If true, exec tasks locally
+eager_propagates: true          # let worker exceptions bubble up
+remote_tracebacks: true         # capture worker stack traces
+track_started: true             # track started
+
+annotations: {'*': {'rate_limit': '10/s'}}
+compression: gzip
+create_missing_queues: true
+default_delivery_mode: persistent
+default_queue: celery
+default_rate_limit: ~
+default_routing_key: ~
+
+
+ignore_result: ~
+publish_retry: ~
+publish_retry_policy: ~
+queues: ~
+routes: ~
+serializer: ~
+
 {% endload %}
 
 {% load_yaml as default_config %}
-  broker: {{ broker_defaults }}
-  celeryd: {{ celeryd_defaults }}
-  celery: {{ celery_defaults }}
+beat: {{ beat_options }}
+broker: {{ broker_defaults }}
+worker: {{ celeryd_defaults }}
+task: {{ task_defaults }}
+result: {{ result_defaults }}
+
+  
+redis_db: 0
+redis_host: localhost
+redis_max_connections: 50
+redis_port: 6379
+
+enable_utc: true
+imports: ~
+timezone: UTC
+
+accept_content: ['json']
 {% endload %}
+## EOF Celery Config
