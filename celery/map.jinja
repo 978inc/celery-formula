@@ -11,4 +11,5 @@
 	'worker': salt['pillar.get']('celery:config:worker', dc.worker, merge=True)
 	} %}
 
+
 {% do celery.update({'config': config}) %}

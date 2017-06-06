@@ -6,7 +6,8 @@ celery-deps:
         - python-pip
         - python-setuptools
 
-celery-fetch-tarball:
+{% if celery.from_source %}
+celery-worker-bootstrap:
   archive.extracted:
     - name: {{ celery.build_dir }}
     - source: {{ 'https://github.com/celery/celery/archive/v%s.tar.gz'|format(celery.version) }}
@@ -21,11 +22,21 @@ celery-install:
     - runas: root
     - name: |
         cd {{ '%s/celery-%s'|format(celery.build_dir, celery.version) }}
-        python setup.py install -q
+        {{ celery.bin/env  }}/bin/python setup.py install -q
     - shell: /bin/bash
     - unless:
         - /usr/local/bin/celery --version | grep {{ celery.version }}
     - requires:
-        - archive: celery-fetch-tarball
+        - archive: celery-worker-bootstrap
         - pkg: celery-deps
           
+{% else %}
+
+# install using pip
+celery-install:
+  pip.installed:
+    - name: celery == {{ celery.version }}
+    - bin_env: {{ celery.bin_env }}
+    - require:
+        - pkg: celery-deps
+{% endif%}

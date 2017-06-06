@@ -2,6 +2,7 @@
 
 CELERY_BIN="/usr/local/bin/celery"
 CELERY_PID_FILE="{{ pid_file }}"
-CELERY_LOG_FILE="{{ log_dir }}/%N.log"
-CELERY_LOG_LEVEL="INFO"
+CELERY_LOG_FILE="{{ log_dir }}/{{ service_name }}-%N.log"
+CELERY_LOG_LEVEL="{{ log_level }}"
+CELERYD_CHDIR="{{ working_dir }}"
 

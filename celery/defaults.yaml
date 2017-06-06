@@ -3,6 +3,14 @@ default:
   version: '4.0.2'
   source_hash: 'sha256=2c38b56599edb0a23725dc750d689100fba8519e4de2542146d351e346dfb5c3'
   service: 'celeryd'
+
+  # controls whether to download a relase from github or not. Leaving this False means we use pip
+  from_source: False
+
+  # should point to a directory which contains a "bin" directory where python and pip can be found
+  # if you're using virutalenv, you would set this to whatever $VIRTUALENV_HOME resolves to, including
+  # a named environment. (read: virtualenvwrapper.sh)
+  bin_env: /usr
   
   build_dir: /usr/local/src/celery    # 
   working_dir: /tmp/celery/working    # 
@@ -12,9 +20,14 @@ default:
   
   broker: redis
   user: 'celery'
-  
+  # list of maps where each item can define options like concurrency and batch_size
+  worker_queues: []
+
 Debian: {}
-RedHat: {}
+RedHat:
+  python_command: /usr/local/bin/python
+  config_dir: /usr/local/etc/celery
+  
 {% endload %}
 
 # Broker configuration
@@ -69,7 +82,7 @@ serializer: json
 ## Task config options
 {% load_yaml as task_defaults %}
 # if true, ack happens after task is complete.
-acks_late: False
+acks_late: false
 # if true, will re-queue tasks even if acks_late is true
 reject_on_worker_lost: false
 # send tasks to the queue. If true, exec tasks locally
@@ -82,7 +95,7 @@ remote_tracebacks: true
 track_started: true
 
 annotations: ~
-compression: 'gzip'
+compression: gzip
 create_missing_queues: true
 default_delivery_mode: persistent
 default_queue: celery

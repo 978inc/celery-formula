@@ -1,0 +1,13 @@
+#!/usr/bin/env python
+# This file is managed by Saltstack, any changes will be overwritten
+#
+{% from "celery/map.jinja" import celery with context -%}
+{% from "celery/macros.sls" import render_config with context -%}
+
+{% for section, data in celery.config.iteritems() -%}
+
+# Begin {{ section.capitalize() }} section
+{{ render_config(section, data) }}
+# EOF {{ section.capitalize() }}
+
+{%- endfor %}

@@ -4,6 +4,7 @@ celery:
     log_dir: /var/log/celery
     broker: redis
     total_workers: 4
+
   worker_queues:
     - name: 'notfast'
       opts: {batch_size: 5}

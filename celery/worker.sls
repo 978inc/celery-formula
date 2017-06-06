@@ -17,6 +17,7 @@
 {% do queue_config.append(qdata) %}
 {% endfor %}
 
+
 worker-bootstrap:
   group.present:
     - name: {{ celery.user }}
@@ -31,7 +32,7 @@ worker-bootstrap:
         - {{ celery.user }}
     - unless: getent passwd {{ celery.user }}
     - require:
-        - group: celery-bootstrap
+        - group: worker-bootstrap
   file.directory:
     - names:
         - {{ celery.run_dir }}
@@ -48,23 +49,29 @@ worker-bootstrap:
         - user
         - mode
         - group
+
 #
 {{ celery.service }}-configfile:
   file.managed:
-    - name: {{ celery.config_dir }}/configfile.py
-    - contents: |
-        #!/usr/bin/env python
-        # This file is managed by Saltstack, any changes will be overwritten
-
-        {% for section, data in celery.config.iteritems() %}
-        # {{ section.capitalize() }}
-        {{ render_config(section, data )}}
-        # EOF {{ section.capitalize() }}
-        {% endfor %}
+    - name: {{ celery.config_dir }}/{{ celery.service }}_configfile.py
+    - source: salt://celery/files/celery-config.jinja
     - user: {{ celery.user }}
     - group: {{ celery.user }}
     - mode: 644
-      
+    - template: jinja
+
+{{ celery.service }}-configfile-symlink:
+  file.symlink:
+    - name: {{ celery.working_dir }}/celeryconfig.py
+    - target: {{ "%s/%s_configfile.py"|format(celery.config_dir, celery.service) }}
+    - force: true
+    - backupname: {{ celery.working_dir }}/celeryconfig.py.bak
+    - user: {{ celery.user }}
+    - group: {{ celery.user }}
+    - mode: 644
+    - require:
+        - file: {{ celery.service }}-configfile
+
 #
 {{ celery.service }}-defaults:
   file.managed:
@@ -74,11 +81,12 @@ worker-bootstrap:
     - user: root
     - mode: 644
     - context:
-        pid_file: {{ celery.run_dir }}/%N.pid
+        log_level: {{ celery.get('log_level', 'WARNING') }}
+        pid_file: {{ celery.run_dir }}/{{ celery.service }}-%N.pid
         log_dir: {{ celery.log_dir }}
         service_name: {{ celery.service }}
         config: {{ config }}
-
+        working_dir: {{ celery.working_dir }}
 # 
 {{ celery.service }}-service:
   file.managed:

@@ -4,9 +4,9 @@
   command -v celery
 }
 
-@test "celery version is 3.1.23" {
+@test "celery version is 4.0.2" {
   run celery --version
-  [[ ${lines[0]} =~ "3.1.23" ]]
+  [[ ${lines[0]} =~ "4.0.2" ]]
 }
 
 @test "verify debugging output is relevant and source_hash is a 'known known'" {

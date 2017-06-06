@@ -12,3 +12,14 @@
   run systemctl status celeryd.service
   [ ${status} = 0 ]
 }
+
+@test "celery config file" {
+  run test -f /etc/celery/celeryd_configfile.py
+}
+
+@test "celery config file length" {
+  cat /etc/celery/celeryd_configfile.py | {
+	  run wc -l
+	[ "$output" -eq "46" ]	
+  }
+}
