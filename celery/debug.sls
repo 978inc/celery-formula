@@ -6,3 +6,6 @@
         {% for k,v in celery.items() %}
         {{ k }} => {{ v }}
         {% endfor %}
+    - user: root
+    - mode: 644
+    

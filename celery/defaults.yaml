@@ -1,30 +1,53 @@
 {% load_yaml as lookup_map %}
 default:
-  version: '3.1.23'
+  version: '4.0.2'
   source_hash: 'sha256=2c38b56599edb0a23725dc750d689100fba8519e4de2542146d351e346dfb5c3'
   service: 'celeryd'
-  build_dir: /usr/local/src/celery
-  working_dir: /tmp/celery/working
-  run_dir: /var/run/celery
-  log_dir: /tmp/celery/log
+
+  # controls whether to download a relase from github or not. Leaving this False means we use pip
+  from_source: False
+
+  # should point to a directory which contains a "bin" directory where python and pip can be found
+  # if you're using virutalenv, you would set this to whatever $VIRTUALENV_HOME resolves to, including
+  # a named environment. (read: virtualenvwrapper.sh)
+  bin_env: /usr
+  
+  build_dir: /usr/local/src/celery    # 
+  working_dir: /tmp/celery/working    # 
+  config_dir: /etc/celery             # location of broker and worker configfiles
+  run_dir: /var/run/celery            # location of pid file
+  log_dir: /tmp/celery/log            # logging
+  
   broker: redis
   user: 'celery'
-  
+  # list of maps where each item can define options like concurrency and batch_size
+  worker_queues: []
+
 Debian: {}
-RedHat: {}
+RedHat:
+  python_command: /usr/local/bin/python
+  config_dir: /usr/local/etc/celery
+  
 {% endload %}
 
+# Broker configuration
 {% load_yaml as broker_defaults %}
 url: 'redis://'
 pool_limit: 10
 connection:
-  timeout: 4
   retry: true
-  max_retires: 50
+  timeout: 60
+  max_retries: 10
+failover_strategy: ~
+heartbeat: ~
+login_method: ~
+pool_limit: ~
+use_ssl: ~
 {% endload %}
+## EOF Broker
 
-{% load_yaml as celeryd_defaults %}
-# Concurrency - change this to add more threads
+{% load_yaml as worker_defaults %}
+# Concurrency - change this to add more threads on each worker
 concurrency: 1
 # messages per thread to prefetch
 prefetch_multiplier: 1
@@ -33,30 +56,77 @@ max_tasks_per_child: 1
 task_time_limit: 3600
 {% endload %}
 
-{% load_yaml as celery_defaults %}
-result_backend: 'redis'
-redis_max_connections: 50
-message_compression: 'gzip'
-accept_content: ['json', 'msgpack']
-task:
-  # only keep task results for 7 days
-  result_expires: {{ 86400 * 7 }}
-  serializer: 'msgpack'
+## Celerybeat configuration options
+{% load_yaml as beat_defaults %}
+max_loop_interval: ~
+schedule: ~
+scheduler: ~
+schedule_filename: ~
+sync_every: ~
+{% endload %}
+## EOF Celerybeat
 
-imports: []
-enable_utc: true
-#celery_timezone: 'US/Eastern'
+## Result backend configuration
+{% load_yaml as result_defaults %}
+compression: gzip
+backend: filesystem
+cache_max: ~
+exchange: ~
+exchange_type: ~
+expires: ~
+persistent: ~
+serializer: json
+{% endload %}
+## EOF Result
 
-# allows for task.retry (but they need to be idempotent)
-acks_late: true
-# propagate exceptions within chords
-chord_propagate: true
-# write down when the task was started by a worker
+## Task config options
+{% load_yaml as task_defaults %}
+# if true, ack happens after task is complete.
+acks_late: false
+# if true, will re-queue tasks even if acks_late is true
+reject_on_worker_lost: false
+# send tasks to the queue. If true, exec tasks locally
+always_eager: false
+# let worker exceptions bubble up
+eager_propagates: true
+# capture worker stack traces
+remote_tracebacks: true
+# track started
 track_started: true
+
+annotations: ~
+compression: gzip
+create_missing_queues: true
+default_delivery_mode: persistent
+default_queue: celery
+default_rate_limit: ~
+default_routing_key: ~
+
+ignore_result: ~
+publish_retry: ~
+publish_retry_policy: ~
+queues: ~
+routes: ~
+serializer: ~
+
 {% endload %}
 
 {% load_yaml as default_config %}
-  broker: {{ broker_defaults }}
-  celeryd: {{ celeryd_defaults }}
-  celery: {{ celery_defaults }}
+beat: {{ beat_defaults }}
+broker: {{ broker_defaults }}
+worker: {{ worker_defaults }}
+task: {{ task_defaults }}
+result: {{ result_defaults }}
+  
+redis_db: 0
+redis_host: localhost
+redis_max_connections: 50
+redis_port: 6379
+
+enable_utc: true
+imports: ~
+timezone: UTC
+
+accept_content: ['json']
 {% endload %}
+## EOF Celery Config
