@@ -1,7 +1,6 @@
 #!jinja
 # This file is managed by Saltstack, any changes will be overwritten!!
 {% from "celery/map.jinja" import celery with context -%}
-
 {% set CMD = "%s/bin/celery multi" % celery.bin_env -%}
 {% set FLAGS = [
   "--pidfile=${CELERY_PID_FILE}",
@@ -24,11 +23,9 @@ Group={{ user|default('celery')  }}
 EnvironmentFile=-/etc/default/{{ service_name }}
 WorkingDirectory={{ working_dir }}
 
-ExecStart={{ CMD }} start {{ celery.total_workers }} {% for svc in queue_config %} -Q:{{ loop.index }} {{ svc['name'] }} -c:{{ loop.index }} {{ svc['concurrency'] }} {% endfor %}  {{ FLAGS }}
-
-ExecStop={{ CMD }} stopwait {{ queue_names|join(' ') }} {{ FLAGS }}
-
-ExecReload={{ CMD }} restart {{ queue_names|join(' ') }} {{ FLAGS }}
+ExecStart=/bin/sh -c '{{ CMD }} start {{ celery.total_workers }} {% for svc in queue_config %} -Q:{{ loop.index }} {{ svc['name'] }} -c:{{ loop.index }} {{ svc['concurrency'] }} {% endfor %}  {{ FLAGS }}'
+ExecStop=/bin/sh -c '{{ CMD }} stopwait {{ queue_names|join(' ') }} {{ FLAGS }}'
+ExecReload=/bin/sh -c '{{ CMD }} restart {{ queue_names|join(' ') }} {{ FLAGS }}'
 
 [Install]
 WantedBy=multi-user.target
