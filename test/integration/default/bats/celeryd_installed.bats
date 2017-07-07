@@ -14,12 +14,12 @@
 }
 
 @test "celery config file" {
-  run test -f /etc/celery/celeryd_configfile.py
+  run test -f /tmp/celery/working/celeryconfig.py
 }
 
 @test "celery config file length" {
-  cat /etc/celery/celeryd_configfile.py | {
+  cat /tmp/celery/working/celeryconfig.py | {
 	  run wc -l
-	[ "$output" -eq "46" ]	
+	[ "$output" -eq "57" ]	
   }
 }

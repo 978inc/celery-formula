@@ -2,12 +2,8 @@
 # This file is managed by Saltstack, any changes will be overwritten
 #
 {% from "celery/map.jinja" import celery with context -%}
-{% from "celery/macros.sls" import render_config with context -%}
+{% from "celery/macros.sls" import render_config,displayer with context -%}
 
-{% for section, data in celery.config.iteritems() -%}
-
-# Begin {{ section.capitalize() }} section
+{% for section, data in celery.config.items() %}
 {{ render_config(section, data) }}
-# EOF {{ section.capitalize() }}
-
-{%- endfor %}
+{% endfor %}

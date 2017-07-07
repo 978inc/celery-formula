@@ -1,7 +1,7 @@
 {% load_yaml as lookup_map %}
 default:
   version: '4.0.2'
-  source_hash: 'sha256=2c38b56599edb0a23725dc750d689100fba8519e4de2542146d351e346dfb5c3'
+  source_hash: 'sha256=ca95d6f80ffd83817ff8368310b191b2198beeeb3bc6202c0ddf0ded566391cc'
   service: 'celeryd'
 
   # controls whether to download a relase from github or not. Leaving this False means we use pip
@@ -12,17 +12,20 @@ default:
   # a named environment. (read: virtualenvwrapper.sh)
   bin_env: /usr
   
-  build_dir: /usr/local/src/celery    # 
+  prefix: /usr/local
   working_dir: /tmp/celery/working    # 
   config_dir: /etc/celery             # location of broker and worker configfiles
   run_dir: /var/run/celery            # location of pid file
   log_dir: /tmp/celery/log            # logging
-  
+  log_level: DEBUG
   broker: redis
   user: 'celery'
   # list of maps where each item can define options like concurrency and batch_size
   worker_queues: []
-
+  # how many celery threads per machine
+  total_workers: 4
+  worker_timeout: 300
+  
 Debian: {}
 RedHat:
   python_command: /usr/local/bin/python
@@ -117,16 +120,14 @@ broker: {{ broker_defaults }}
 worker: {{ worker_defaults }}
 task: {{ task_defaults }}
 result: {{ result_defaults }}
-  
-redis_db: 0
-redis_host: localhost
-redis_max_connections: 50
-redis_port: 6379
-
+redis:
+  db: 0
+  host: localhost
+  max_connections: 50
+  port: 6379
+# Any keys in this section will be treated as top level keys and will not be collapsed
 enable_utc: true
-imports: ~
 timezone: UTC
-
 accept_content: ['json']
 {% endload %}
 ## EOF Celery Config

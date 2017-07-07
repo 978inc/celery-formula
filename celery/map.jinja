@@ -5,11 +5,6 @@
 
 {% set celery = salt['grains.filter_by'](lookup_map, merge=_pillar, base='default')  %}
 
-{% set config = {
-  'broker': salt['pillar.get']('celery:config:broker', dc.broker, merge=True),
-	'task': salt['pillar.get']('celery:config:task', dc.task, merge=True),
-	'worker': salt['pillar.get']('celery:config:worker', dc.worker, merge=True)
-	} %}
-
+{% set config = salt['pillar.get']('celery:config', dc, merge=True) %}
 
 {% do celery.update({'config': config}) %}

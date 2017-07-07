@@ -38,7 +38,6 @@ worker-bootstrap:
         - {{ celery.run_dir }}
         - {{ celery.working_dir }}
         - {{ celery.log_dir }}
-        - {{ celery.config_dir }}
     - user: {{ celery.user }}
     - group: {{ celery.user }}
     - mode: 775
@@ -53,24 +52,13 @@ worker-bootstrap:
 #
 {{ celery.service }}-configfile:
   file.managed:
-    - name: {{ celery.config_dir }}/{{ celery.service }}_configfile.py
+    - name: {{ celery.working_dir }}/celeryconfig.py
     - source: salt://celery/files/celery-config.jinja
     - user: {{ celery.user }}
     - group: {{ celery.user }}
     - mode: 644
     - template: jinja
 
-{{ celery.service }}-configfile-symlink:
-  file.symlink:
-    - name: {{ celery.working_dir }}/celeryconfig.py
-    - target: {{ "%s/%s_configfile.py"|format(celery.config_dir, celery.service) }}
-    - force: true
-    - backupname: {{ celery.working_dir }}/celeryconfig.py.bak
-    - user: {{ celery.user }}
-    - group: {{ celery.user }}
-    - mode: 644
-    - require:
-        - file: {{ celery.service }}-configfile
 
 #
 {{ celery.service }}-defaults:
@@ -82,7 +70,7 @@ worker-bootstrap:
     - mode: 644
     - context:
         log_level: {{ celery.get('log_level', 'WARNING') }}
-        pid_file: {{ celery.run_dir }}/{{ celery.service }}-%N.pid
+        run_dir: {{ celery.run_dir }}
         log_dir: {{ celery.log_dir }}
         service_name: {{ celery.service }}
         config: {{ config }}
@@ -113,10 +101,12 @@ worker-bootstrap:
     - force: true
     - require:
         - file: {{ celery.service }}-service
+        - file: {{ celery.service }}-configfile
   service.running:
     - init_delay: 10
     - watch:
         - file: {{ celery.service }}-service
         - file: {{ celery.service }}-defaults
+        - file: {{ celery.service }}-configfile
 #
 {% endwith %}

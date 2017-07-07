@@ -12,8 +12,6 @@
 {{ name|lower }} = {{ thing|capitalize }}
 {% elif thing != None and thing|string != 'None'  -%}
 {{ name|lower }} = {{ thing|json }}
-{% else -%}
-## {{ name }} is UNDEFINED
 {% endif -%}
 {%- endmacro %}
 
