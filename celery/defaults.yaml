@@ -120,11 +120,7 @@ broker: {{ broker_defaults }}
 worker: {{ worker_defaults }}
 task: {{ task_defaults }}
 result: {{ result_defaults }}
-redis:
-  db: 0
-  host: localhost
-  max_connections: 50
-  port: 6379
+
 # Any keys in this section will be treated as top level keys and will not be collapsed
 enable_utc: true
 timezone: UTC

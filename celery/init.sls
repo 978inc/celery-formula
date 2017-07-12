@@ -31,11 +31,15 @@ celery-install:
           
 {% else %}
 
-# install using pip
+{% if celery.bin_env != '/usr' %}
+{% set prefix = celery.bin_env %}
+{% else %}
+{% set prefix = celery.prefix %}
+# install using pip in {{ prefix }} 
 celery-install:
   pip.installed:
     - name: celery == {{ celery.version }}
-    - bin_env: {{ celery.bin_env }}
+    - bin_env: {{ prefix }}
     - require:
         - pkg: celery-deps
 {% endif%}
