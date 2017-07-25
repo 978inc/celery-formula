@@ -52,7 +52,7 @@ worker-bootstrap:
 #
 {{ celery.service }}-configfile:
   file.managed:
-    - name: {{ celery.working_dir }}/celeryconfig.py
+    - name: {{ celery.working_dir }}/{{ celery.config_module }}.py
     - source: salt://celery/files/celery-config.jinja
     - user: {{ celery.user }}
     - group: {{ celery.user }}
