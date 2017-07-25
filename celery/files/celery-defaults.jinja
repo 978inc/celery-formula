@@ -1,8 +1,7 @@
 # Managed by Saltstack, changes will be lost
 {% from "celery/map.jinja" import celery, config with context %}
 ENABLED="true"
-CELERY_CONFIG_MODULE="celeryd"
-#CELERY_APP="celeryd:celery"
+CELERY_CONFIG_MODULE="{{ celery.config_module }}"
 
 CELERYD_USER={{ celery.user }}
 CELERYD_GROUP={{ celery.user }}

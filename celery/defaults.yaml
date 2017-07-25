@@ -2,8 +2,11 @@
 default:
   version: '4.0.2'
   source_hash: 'sha256=ca95d6f80ffd83817ff8368310b191b2198beeeb3bc6202c0ddf0ded566391cc'
+  
+  # name of the systemd service 
   service: 'celeryd'
-
+  # name of the config file dropped in celery.working_dir
+  config_module: 'celeryd'
   # controls whether to download a relase from github or not. Leaving this False means we use pip
   from_source: False
 
@@ -12,12 +15,12 @@ default:
   # a named environment. (read: virtualenvwrapper.sh)
   bin_env: /usr
   
-  prefix: /usr/local
-  working_dir: /tmp/celery/working    # 
+  prefix: /usr/local                  # used for source installs
+  working_dir: /tmp/celery/working    # Absolute path to the working directory of the workers threads, alos home to celery.config_module
   config_dir: /etc/celery             # location of broker and worker configfiles
   run_dir: /var/run/celery            # location of pid file
-  log_dir: /tmp/celery/log            # logging
-  log_level: DEBUG
+  log_dir: /tmp/celery/log            # location of logfiles
+  log_level: DEBUG                    #
   broker: redis
   user: 'celery'
   # list of maps where each item can define options like concurrency and batch_size
@@ -114,6 +117,10 @@ serializer: ~
 
 {% endload %}
 
+
+##
+# Using the above jinja variables, we 
+##
 {% load_yaml as default_config %}
 beat: {{ beat_defaults }}
 broker: {{ broker_defaults }}
