@@ -1,31 +1,20 @@
 #!jinja
 # This file is managed by Saltstack, any changes will be overwritten!!
 {% from "celery/map.jinja" import celery with context -%}
-{% set prefix = celery.prefix %}
+{% set prefix = celery.prefix -%}
 {% if celery.bin_env != '/usr' -%}
-{% set prefix = celery.bin_env %}
+{% set prefix = celery.bin_env -%}
 {% endif %}
 {% set cmd = "%s/bin/celery" % prefix -%}
-
 {% set FLAGS = [
   "--pidfile=${CELERYD_PID_FILE} "
   "--loglevel=${CELERYD_LOG_LEVEL} ",
   "--logfile=${CELERYD_LOG_FILE} "
-  ]|join(" ") %}
-# FLAGS = {{ FLAGS }}
-{% set queue_names = ['default'] -%}
-{% for svc in queue_config %}{% do queue_names.append(svc['name']) %}{% endfor -%}
-# queue_names => {{ queue_names }}
+  ]|join(" ") -%}
+
 [Unit]
 Description=Celery Worker Daemon - {{ service_name|upper|replace("-", "_") }}
 After=network.target
-
-{% set cmd_opts = [] -%}
-{% set node_names = [] %}
-{% for svc in queue_config -%}
-{% do cmd_opts.append(' -Q:%d %s -c:%d %d '|format(loop.index, svc['name'], loop.index, svc['concurrency'])) -%}
-{% do node_names.append(svc['name']) %}
-{% endfor -%}
 
 [Service]
 Type=forking
@@ -33,9 +22,9 @@ User={{ user|default('celery') }}
 Group={{ user|default('celery')  }}
 EnvironmentFile=/etc/default/{{ service_name }}
 WorkingDirectory={{ working_dir }}
-ExecStart=/bin/sh -c '{{ cmd }} multi start {{ celery.total_workers }} {{ cmd_opts|join(' ') }} {{ FLAGS }} ${CELERYD_OPTS}'
-ExecStop=/bin/sh -c '{{ cmd }} multi stopwait {{ node_names|join(' ') }} {{ FLAGS }} ${CELERYD_OPTS}'
-ExecReload=/bin/sh -c '{{ cmd }} multi restart {{ node_names|join(' ') }} {{ FLAGS }} ${CELERYD_OPTS}'
+ExecStart=/bin/sh -c '{{ cmd }} multi start {{ celery.total_workers }} {{ FLAGS }} ${CELERYD_OPTS}'
+ExecStop=/bin/sh -c '{{ cmd }} multi stopwait {{ celery.total_workers }} {{ FLAGS }} ${CELERYD_OPTS}'
+ExecReload=/bin/sh -c '{{ cmd }} multi restart {{ celery.total_workers }} {{ FLAGS }} ${CELERYD_OPTS}'
 
 [Install]
 WantedBy=multi-user.target
