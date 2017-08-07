@@ -42,4 +42,4 @@ celery-install:
     - bin_env: {{ prefix }}
     - require:
         - pkg: celery-deps
-{% endif%}
+{% endif %}
