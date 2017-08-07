@@ -35,6 +35,8 @@ celery-install:
 {% set prefix = celery.bin_env %}
 {% else %}
 {% set prefix = celery.prefix %}
+{% endif %}
+
 # install using pip in {{ prefix }} 
 celery-install:
   pip.installed:
@@ -42,4 +44,4 @@ celery-install:
     - bin_env: {{ prefix }}
     - require:
         - pkg: celery-deps
-{% endif %}
+
