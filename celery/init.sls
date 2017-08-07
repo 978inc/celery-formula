@@ -45,3 +45,4 @@ celery-install:
     - require:
         - pkg: celery-deps
 
+{% endif %}
