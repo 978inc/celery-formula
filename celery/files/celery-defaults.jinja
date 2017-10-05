@@ -15,4 +15,4 @@ CELERYD_OPTS="{{ celeryd_opts }}"
 {% else -%}
 CELERYD_OPTS=""
 {% endif -%}
-CELERY_BIN="/usr/local/bin/celery"
+CELERY_BIN="{{ celery.bin_env }}/bin/celery"
