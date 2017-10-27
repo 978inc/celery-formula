@@ -20,7 +20,7 @@
 # append to our list of que dicts
 {% do queue_config.append(qdata) %}
 # append to the celeryd options list
-{% do celeryd_opts.append(' -Q:%d %s -c:%d %d '|format(loop.index, qdata['name'], loop.index, qdata['concurrency'])) -%}
+{% do celeryd_opts.append(' -Q:%d %s -c:%d %d '|format(loop.index, qdata.get('name', 'default'), loop.index, qdata.get('concurrency', config['total_workers']))) -%}
 {% endfor %}
 # EOF worker_queues
 
