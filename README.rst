@@ -18,20 +18,30 @@ Available states
 
 ``celery``
 ------------
-Installs the Celery library and executables
+Installs everything by including `celery.env`
+
+``celery.env``
+------------
+Installs the Celery library and executables according to the pillar and grain data
 
 ``celery.worker``
 ------------------
-Creates a systemd service for running Celery Workers
+Creates a systemd service for running Celery Workers and by default will setup a single queue named **default**, `See defaults.yaml <https://github.com/978inc/celery-formula/blob/master/celery/defaults.yaml>`_ for a more complete example.
 
 `celery.worker_queues` is a list of maps which contain four keys: `name`, `concurrency` and `opts`.
 - `name` controls the name of the queue
 - `concurrency` controls how many worker processes per queue
 - `opts` is a map where the keys are mapped to environment variables prefixed with **CELERYD_**
 
+
 ``celery.debug``
 -----------------
-Helpful for debugging, dumps the jinja map to a text file in **/tmp**
+Helpful for debugging, dumps the jinja map to a text file in **/tmp**.
+
+
+``celery.testing``
+------------------
+Only used during testing, will install redis to back the broker.
 
 
 

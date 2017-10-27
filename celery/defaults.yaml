@@ -1,6 +1,6 @@
 {% load_yaml as lookup_map %}
 default:
-  version: '4.0.2'
+  version: '4.1.0'
   source_hash: 'sha256=ca95d6f80ffd83817ff8368310b191b2198beeeb3bc6202c0ddf0ded566391cc'
   
   # name of the systemd service 
