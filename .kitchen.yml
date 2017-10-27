@@ -4,6 +4,11 @@ driver:
 
 provisioner:
   name: salt_solo
+  log_level: debug
+  salt_install: "bootstrap"
+  salt_Version: "latest"
+  salt_minion_id: "kitchen-test-celery"
+  
   formula: celery
   pillars-from-files:
     celery.sls: pillar.example
@@ -16,12 +21,21 @@ provisioner:
     base:
       "*":
         - celery.testing
-        - celery
-        - celery.worker
-        - celery.debug 
+        - celery.env
+        - celery.debug
+        
 platforms:
   - name: ubuntu-16.04
     driver:
       box: bento/ubuntu-16.04
+      
 suites:
-  - name: default
+  - name: base
+
+  - name: worker
+    state_top:
+      base:
+        '*':
+          - celery.testing
+          - celery.worker
+          - celery.debug
