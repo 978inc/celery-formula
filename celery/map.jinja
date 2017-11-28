@@ -7,4 +7,4 @@
 
 {% set config = salt['pillar.get']('celery:config', dc, merge=True) %}
 
-{% do celery.update({'config': config}) %}
+{% do celery.update({'config': config, 'worker_queues': salt['pillar.get']('celery:worker_queues')}) %}
