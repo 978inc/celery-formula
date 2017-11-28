@@ -12,12 +12,29 @@ include:
 {% set svc_name = "flower" %}
 
 bootstrap-{{ svc_name }}:
+  group.present:
+    - name: {{ celery.user }}
+    - unless: getent passwd {{ celery.user }}
+  user.present:
+    - name: {{ celery.user }}
+    - fullname: "Celery Service"
+    - createhome: true
+    - shell: /bin/bash
+    - gid_from_name: true
+    - groups:
+        - {{ celery.user }}
+    - unless: getent passwd {{ celery.user }}
+    - require:
+        - group: bootstrap-{{ svc_name }}
   file.directory:
     - name: {{ celery.working_dir }}/flower
     - user: {{ celery.user }}
     - group: {{ celery.user }}
     - mode: 775
     - makedirs: true
+    - require:
+        - sls: celery.env
+          
     - recurse:
         - user
         - mode
@@ -25,8 +42,8 @@ bootstrap-{{ svc_name }}:
         
 {{ svc_name }}:
   pip.installed:
+    - name: flower
     - bin_env: {{ prefix }}
-    - user: ubuntu
     - require:
         - file: bootstrap-{{ svc_name }}
           
@@ -35,7 +52,7 @@ bootstrap-{{ svc_name }}:
     - context:
         bin: {{ prefix }}/bin/flower
         work_dir: {{ celery.working_dir }}
-    - source: salt://flower/files/systemd.service.jinja
+    - source: salt://celery/files/flower-service.jinja
     - template: jinja
     - require:
         - pip: {{ svc_name }}
@@ -45,9 +62,5 @@ bootstrap-{{ svc_name }}:
     - name: {{ svc_name }}
     - watch:
         - file: {{ svc_name }}
-            
-    - require:
-        - pip: {{ svc_name }}
-        
       
 {% endwith %}
