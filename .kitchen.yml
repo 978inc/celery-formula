@@ -27,21 +27,30 @@ provisioner:
     base:
       "*":
         - celery.testing
+        - celery.debug        
         - celery.env
-        - celery.debug
+
         
 platforms:
-  - name: ubuntu-16.04
+  # - name: centos
+  #   driver:
+  #     box: bento/centos-7.4
+  - name: ubuntu
     driver:
-      box: bento/ubuntu-16.04
-      
+      box: bento/ubuntu-17.10
+
 suites:
-  - name: base
+  - name: default
 
   - name: worker
-    state_top:
-      base:
-        '*':
-          - celery.testing
-          - celery.worker
-          - celery.debug
+    verifier:
+      patterns:
+        - tests/integration/worker/
+    provisioner:
+      state_top:
+        base:
+          '*':
+            - celery.testing
+            - celery.debug            
+            - celery.worker
+
