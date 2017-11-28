@@ -11,8 +11,7 @@ default:
   from_source: False
 
   # should point to a directory which contains a "bin" directory where python and pip can be found
-  # if you're using virutalenv, you would set this to whatever $VIRTUALENV_HOME resolves to, including
-  # a named environment. (read: virtualenvwrapper.sh)
+  # if you're using virutalenv, you would set this to whatever $VIRTUALENV_HOME resolves to (ex. $HOME/.virtual/myproject)
   bin_env: /usr
   
   prefix: /usr/local                  # used for source installs
