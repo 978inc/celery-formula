@@ -1,6 +1,7 @@
 #!jinja
 # This file is managed by Saltstack, any changes will be overwritten!!
 {% from "celery/map.jinja" import celery with context -%}
+
 {% set prefix = celery.prefix -%}
 {% if celery.bin_env != '/usr' -%}
 {% set prefix = celery.bin_env -%}
@@ -16,17 +17,21 @@
 
 [Unit]
 Description=Celery Worker Daemon - {{ service_name|upper|replace("-", "_") }}
-After=network.target
+After=network-online.target
+Wants=network-online.target
 
 [Service]
 Type=forking
+{%- with workers = queue_config.keys()|join(' ') %}
 User={{ user|default('celery') }}
 Group={{ user|default('celery')  }}
 EnvironmentFile=/etc/default/{{ service_name }}
 WorkingDirectory={{ working_dir }}
-ExecStart=/bin/sh -c '{{ cmd }} multi start {{ celery.total_workers }} {{ FLAGS }} ${CELERYD_OPTS}'
-ExecStop=/bin/sh -c '{{ cmd }} multi stopwait {{ celery.total_workers }} {{ FLAGS }} ${CELERYD_OPTS}'
-ExecReload=/bin/sh -c '{{ cmd }} multi restart {{ celery.total_workers }} {{ FLAGS }} ${CELERYD_OPTS}'
+
+ExecStart=/bin/sh -c '{{ cmd }} multi start ${CELERYD_NODES} {{ FLAGS }} ${CELERYD_OPTS}'
+ExecStop=/bin/sh -c '{{ cmd }} multi stopwait ${CELERYD_NODES} --pidfile=${CELERYD_PID_FILE}'
+ExecReload=/bin/sh -c '{{ cmd }} multi start ${CELERYD_NODES} {{ FLAGS }} ${CELERYD_OPTS}'
+{% endwith %}
 
 [Install]
 WantedBy=multi-user.target
