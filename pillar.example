@@ -6,21 +6,19 @@ celery:
   worker_queues:
     - name: 'notfast'
       opts: {batch_size: 5}
-      concurrency: 1
 
     - name: 'superfast'
       opts: {batch_size: 100, prefetch_multiplier: 10}
-      concurrency: 3
+      concurrency: 10
 
   config:
     worker:
-      concurrency: 4
-      batch_size: 10
+      concurrency: 2
       
     broker:
       url: 'redis://localhost:6379/0'
     
-    imports: ['pprint.pprint', 'copy.copy']
+
     enable_utc: true
     timezone: 'UTC'
     result_backend: 'redis://localhost:6379/1'

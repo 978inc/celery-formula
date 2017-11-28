@@ -1,14 +1,19 @@
 {% from "celery/map.jinja" import celery with context %}
 {% from 'celery/macros.sls' import render_config %}
 
-{% with worker_queues = salt['pillar.get']('celery:worker_queues',[{'name': 'default'}]) %}
+include:
+  - celery.env
+  
+{% with worker_queues = salt['pillar.get']('celery:worker_queues', []) %}
 {% set config = celery.get('config', {}) %}
 {% set default_queue_cfg = config['worker'] %}
 
-# build up a list of dicts, each representing a celery worker queue
-{% set queue_config = [] %}
+
+
+# build up a map of dicts, each representing a celery worker queue
+{% set queue_config = {} %}
 # build up a list of options to pass the celery daemon
-{% set celeryd_opts = [] %}
+{% set celeryd_opts = ['-c 1'] %}
 
 {% for qdata in worker_queues  %}
 # start with defaults
@@ -17,11 +22,17 @@
 {% do tmp.update(qdata.get('opts', {})) %}
 # now update the `qdata` map with the extended options
 {% do qdata.update({'opts': tmp}) %}
-# append to our list of que dicts
-{% do queue_config.append(qdata) %}
-# append to the celeryd options list
-{% do celeryd_opts.append(' -Q:%d %s -c:%d %d '|format(loop.index, qdata.get('name', 'default'), loop.index, qdata.get('concurrency', config['total_workers']))) -%}
+{% set qname = qdata.get('name', 'default') %}
+{% do queue_config.update({qname: qdata})%}
+
+{% set cc = qdata.get('concurrency', 0) %}
+{% if cc > 0 %}
+# append concurrency settings to the command list
+{% do celeryd_opts.append('-c:%d %d'|format(loop.index, cc)) -%}
+{% endif %}
+
 {% endfor %}
+
 # EOF worker_queues
 
 worker-bootstrap:
@@ -64,7 +75,8 @@ worker-bootstrap:
     - group: {{ celery.user }}
     - mode: 644
     - template: jinja
-
+    - context:
+        queue_config: {{ queue_config }}
 
 #
 {{ celery.service }}-defaults:
@@ -82,6 +94,8 @@ worker-bootstrap:
         config: {{ config }}
         working_dir: {{ celery.working_dir }}
         celeryd_opts: {{ celeryd_opts|join(' ') }}
+        queue_config: {{ queue_config }}
+
 # 
 {{ celery.service }}-service:
   file.managed:
@@ -99,7 +113,8 @@ worker-bootstrap:
         working_dir: {{ celery.working_dir }}
         service_name: {{ celery.service  }}
         queue_config: {{ queue_config }}
-
+        total_workers: {{ worker_queues|length }}
+        celeryd_opts: {{ celeryd_opts|join(' ') }}
 #
 {{ celery.service }}:
   file.symlink:
@@ -110,7 +125,10 @@ worker-bootstrap:
         - file: {{ celery.service }}-service
         - file: {{ celery.service }}-configfile
   service.running:
-    - init_delay: 10
+    - enable: true
+    - init_delay: 3
+    - sig: celery
+    - unmask: true
     - watch:
         - file: {{ celery.service }}-service
         - file: {{ celery.service }}-defaults

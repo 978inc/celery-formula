@@ -11,22 +11,19 @@ default:
   from_source: False
 
   # should point to a directory which contains a "bin" directory where python and pip can be found
-  # if you're using virutalenv, you would set this to whatever $VIRTUALENV_HOME resolves to, including
-  # a named environment. (read: virtualenvwrapper.sh)
+  # if you're using virutalenv, you would set this to whatever $VIRTUALENV_HOME resolves to (ex. $HOME/.virtual/myproject)
   bin_env: /usr
   
   prefix: /usr/local                  # used for source installs
   working_dir: /tmp/celery/working    # Absolute path to the working directory of the workers threads, alos home to celery.config_module
   config_dir: /etc/celery             # location of broker and worker configfiles
   run_dir: /var/run/celery            # location of pid file
-  log_dir: /tmp/celery/log            # location of logfiles
+  log_dir: /var/log/celery            # location of logfiles
   log_level: DEBUG                    #
   broker: redis
   user: 'celery'
   # list of maps where each item can define options like concurrency and batch_size
   worker_queues: []
-  # how many celery threads per machine
-  total_workers: 4
   worker_timeout: 300
   
 Debian: {}
@@ -104,7 +101,7 @@ annotations: ~
 compression: gzip
 create_missing_queues: true
 default_delivery_mode: persistent
-default_queue: celery
+default_queue: ~
 default_rate_limit: ~
 default_routing_key: ~
 

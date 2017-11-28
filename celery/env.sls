@@ -40,9 +40,9 @@ celery-install:
           
 {% else %}
 
-{% with prefix = celery.prefix %}
-{% if celery.bin_env != '/usr' %}
-{% set prefix = celery.bin_env %}
+{% with prefix = celery.bin_env %}
+{% if celery.prefix != '/usr/local' %}
+{% set prefix = celery.celery_prefix %}
 {% endif %}
 
 # install using pip in {{ prefix }} 
