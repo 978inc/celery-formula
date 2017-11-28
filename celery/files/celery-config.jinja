@@ -1,9 +1,26 @@
-#!/usr/bin/env python
-# This file is managed by Saltstack, any changes will be overwritten
-#
 {% from "celery/map.jinja" import celery with context -%}
-{% from "celery/macros.sls" import render_config,displayer with context -%}
+{% from "celery/macros.sls" import render_config, displayer with context -%}
+
+
+CELERY_CONFIG_MODULE = "{{ celery.config_module }}"
+
+CELERYD_USER = "{{ celery.user }}"
+CELERYD_GROUP = "{{ celery.user }}"
+
+CELERYD_PID_FILE = "{{ celery.run_dir  }}/{{ celery.service }}-%n.pid"
+CELERYD_LOG_FILE = "{{ celery.log_dir }}/{{ celery.service }}-%n%I.log"
+CELERYD_LOG_LEVEL = "{{ celery.log_level }}"
+CELERYD_STATE_FILE = "{{ celery.run_dir }}/{{ celery.service }}/%n.state"
+CELERYD_CHDIR = "{{ celery.working_dir }}"
+CELERYD_CREATE_DIRS = 1
+CELERY_CREATE_RUNDIR = 1
+CELERY_CREATE_LOGDIR = 1
+CELERYD_MULTI = "multi"
+CELERYD_NODES = "{{ queue_config.keys()|join(' ')}}"
+CELERY_BIN = "{{ celery.prefix }}/bin/celery"
+
+
 
 {% for section, data in celery.config.items() %}
-{{ render_config(section, data) }}
+{{render_config(section, data)}}
 {% endfor %}
