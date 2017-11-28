@@ -2,6 +2,11 @@
 # This file is managed by Saltstack, any changes will be overwritten!!
 {% from "celery/map.jinja" import celery with context -%}
 
+{% set queue_names = [] %}
+{% for i in celery['worker_queues'] %}
+{% do queue_names.append(i.get('name', 'default')) %}
+{% endfor %}
+
 {% set prefix = celery.prefix -%}
 {% if celery.bin_env != '/usr' -%}
 {% set prefix = celery.bin_env -%}
@@ -9,10 +14,10 @@
 
 {% set cmd = "%s/bin/celery" % prefix -%}
 {% set FLAGS = [
-  "--pidfile=${CELERYD_PID_FILE} "
-  "--loglevel=${CELERYD_LOG_LEVEL} ",
-  "--logfile=${CELERYD_LOG_FILE} ",
-  "--statedb=${CELERYD_STATE_FILE} "
+  "--pidfile={{ celery.run_dir }}/{{ celery.service }}-%n.pid"
+  "--loglevel={{ celery.log_level }}",
+  "--logfile={{ celery.log_dir }}/{{ celery.service }}-%n%I.log",
+  "--statedb={{ celery.run_dir }}/{{ celery.service }}/%n.state "
   ]|join(" ") -%}
 
 [Unit]
@@ -26,11 +31,16 @@ Type=forking
 User={{ user|default('celery') }}
 Group={{ user|default('celery')  }}
 EnvironmentFile=/etc/default/{{ service_name }}
-WorkingDirectory={{ working_dir }}
+WorkingDirectory={{ working_dir }}/
 
-ExecStart=/bin/sh -c '{{ cmd }} multi start ${CELERYD_NODES} {{ FLAGS }} ${CELERYD_OPTS}'
-ExecStop=/bin/sh -c '{{ cmd }} multi stopwait ${CELERYD_NODES} --pidfile=${CELERYD_PID_FILE}'
-ExecReload=/bin/sh -c '{{ cmd }} multi start ${CELERYD_NODES} {{ FLAGS }} ${CELERYD_OPTS}'
+ExecStart=/bin/sh -c '{{ cmd }} multi start {{ queue_names|join(" ") }}  {{ celeryd_opts }} \
+--pidfile={{ celery.run_dir }}/{{ celery.service }}-%n.pid \
+--loglevel={{ celery.log_level }} \
+--logfile={{ celery.log_dir }}/{{ celery.service }}-%n%I.log \
+--statedb={{ celery.run_dir }}/{{ celery.service }}/%n.state \
+--workdir={{ working_dir }} --config={{ celery.config_module }}'
+
+ExecStop=/bin/sh -c '{{ cmd }} multi stopwait {{ queue_names|join(" ") }}  --pidfile={{ celery.run_dir }}/{{ celery.service }}-%n.pid '
 {% endwith %}
 
 [Install]
