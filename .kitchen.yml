@@ -37,7 +37,7 @@ platforms:
   #     box: bento/centos-7.4
   - name: ubuntu
     driver:
-      box: bento/ubuntu-17.10
+      box: bento/ubuntu-17.04
 
 suites:
   - name: default
@@ -45,6 +45,7 @@ suites:
   - name: worker
     verifier:
       patterns:
+        - tests/integration/default/
         - tests/integration/worker/
     provisioner:
       state_top:
@@ -54,3 +55,16 @@ suites:
             - celery.debug            
             - celery.worker
 
+  - name: flower
+    verifier:
+      patterns:
+        - tests/integration/default/
+        - tests/integration/flower/
+    provisioner:
+      state_top:
+        base:
+          '*':
+            - celery.testing
+            - celery.debug            
+            - celery.flower
+            

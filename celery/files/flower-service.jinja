@@ -1,0 +1,25 @@
+#!jinja
+# This file is managed by Saltstack, any changes will be overwritten!!
+{% from "celery/map.jinja" import celery with context -%}
+
+{% set prefix = celery.prefix -%}
+{% if celery.bin_env != '/usr' -%}
+{% set prefix = celery.bin_env -%}
+{% endif %}
+
+[Unit]
+
+Description=Celery Flower Service
+After=network.target
+After=systemd-user-sessions.service
+After=network-online.target
+
+[Service]
+User={{ celery.user }}
+Type=simple
+WorkingDirectory={{ celery.working_dir }}/flower
+ExecStart={{ '%s/bin/flower'|format(prefix) }}
+ 
+[Install]
+
+WantedBy=multi-user.target
