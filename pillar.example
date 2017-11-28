@@ -18,7 +18,7 @@ celery:
     broker:
       url: 'redis://localhost:6379/0'
     
-    imports: ['pprint.pprint', 'copy.copy']
+
     enable_utc: true
     timezone: 'UTC'
     result_backend: 'redis://localhost:6379/1'
