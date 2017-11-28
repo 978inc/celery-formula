@@ -15,7 +15,7 @@ CELERYD_CREATE_DIRS=1
 CELERY_CREATE_RUNDIR=1
 CELERY_CREATE_LOGDIR=1
 CELERYD_MULTI="multi"
-CELERYD_NODES="{{ queue_config.keys()|join(' ')}}"
+CELERYD_NODES="{% for i in celery['worker_queues'] %}{{ i.get('name', 'default') }} {% endfor %}"
 {% if celeryd_opts is defined -%}
 CELERYD_OPTS="{{ celeryd_opts }}"
 {% else -%}
