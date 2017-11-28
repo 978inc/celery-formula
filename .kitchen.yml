@@ -2,11 +2,17 @@
 driver:
   name: vagrant
 
+verifier:
+  name: inspec
+  sudo: true
+
+  
 provisioner:
   name: salt_solo
   log_level: debug
+  omnibus_cachier: true
   salt_install: "bootstrap"
-  salt_Version: "latest"
+  salt_version: "latest"
   salt_minion_id: "kitchen-test-celery"
   
   formula: celery
