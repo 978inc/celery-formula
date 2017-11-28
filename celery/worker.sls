@@ -22,16 +22,14 @@ include:
 {% do tmp.update(qdata.get('opts', {})) %}
 # now update the `qdata` map with the extended options
 {% do qdata.update({'opts': tmp}) %}
-{% do queue_config.update({qdata.get('name', 'default'): qdata})%}
+{% set qname = qdata.get('name', 'default') %}
+{% do queue_config.update({qname: qdata})%}
 
 {% set cc = qdata.get('concurrency', 0) %}
 {% if cc > 0 %}
-{% set cmd = '-c:%d %d'|format(loop.index, cc)  %}
-# append to the celeryd options list
-{% do celeryd_opts.append(cmd) -%}
+# append concurrency settings to the command list
+{% do celeryd_opts.append('-c:%d %d'|format(loop.index, cc)) -%}
 {% endif %}
-
-
 
 {% endfor %}
 
@@ -116,6 +114,7 @@ worker-bootstrap:
         service_name: {{ celery.service  }}
         queue_config: {{ queue_config }}
         total_workers: {{ worker_queues|length }}
+        celeryd_opts: {{ celeryd_opts|join(' ') }}
 #
 {{ celery.service }}:
   file.symlink:
@@ -126,7 +125,10 @@ worker-bootstrap:
         - file: {{ celery.service }}-service
         - file: {{ celery.service }}-configfile
   service.running:
-    - init_delay: 10
+    - enable: true
+    - init_delay: 3
+    - sig: celery
+    - unmask: true
     - watch:
         - file: {{ celery.service }}-service
         - file: {{ celery.service }}-defaults
