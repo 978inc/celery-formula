@@ -9,10 +9,17 @@ CELERYD_GROUP={{ celery.user }}
 CELERYD_PID_FILE="{{ celery.run_dir  }}/{{ celery.service }}-%n.pid"
 CELERYD_LOG_FILE="{{ celery.log_dir }}/{{ celery.service }}-%n%I.log"
 CELERYD_LOG_LEVEL="{{ celery.log_level }}"
+CELERYD_STATE_FILE="{{ celery.run_dir }}/{{ celery.service }}/%n.state"
 CELERYD_CHDIR="{{ celery.working_dir }}"
+CELERYD_CREATE_DIRS=true
+CELERY_CREATE_RUNDIR=true
+CELERY_CREATE_LOGDIR=true
+CELERYD_MULTI="multi"
+
 {% if celeryd_opts is defined -%}
 CELERYD_OPTS="{{ celeryd_opts }}"
 {% else -%}
 CELERYD_OPTS=""
-{% endif -%}
+{% endif %}
+
 CELERY_BIN="{{ celery.bin_env }}/bin/celery"
