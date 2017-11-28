@@ -18,7 +18,7 @@ default:
   working_dir: /tmp/celery/working    # Absolute path to the working directory of the workers threads, alos home to celery.config_module
   config_dir: /etc/celery             # location of broker and worker configfiles
   run_dir: /var/run/celery            # location of pid file
-  log_dir: /tmp/celery/log            # location of logfiles
+  log_dir: /var/log/celery            # location of logfiles
   log_level: DEBUG                    #
   broker: redis
   user: 'celery'
@@ -101,7 +101,7 @@ annotations: ~
 compression: gzip
 create_missing_queues: true
 default_delivery_mode: persistent
-default_queue: celery
+default_queue: ~
 default_rate_limit: ~
 default_routing_key: ~
 
