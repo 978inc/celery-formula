@@ -7,16 +7,4 @@ control 'Celery' do
     end
   end
 
-  describe file('/var/log/celery') do
-    it { should be_directory }
-    it { should be_owned_by 'celery' }
-    it { should be_grouped_into 'celery' }
-  end
-
-  describe file('/var/log/celery') do
-    it { should be_directory }
-    it { should be_owned_by 'celery' }
-    it { should be_grouped_into 'celery' }
-  end
-
 end
