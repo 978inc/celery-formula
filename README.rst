@@ -24,6 +24,10 @@ Installs everything by including `celery.env`
 ------------
 Installs the Celery library and executables according to the pillar and grain data
 
+``celery.flower``
+------------
+Installs the Flower UI for Celery
+
 ``celery.worker``
 ------------------
 Creates a systemd service for running Celery Workers and by default will setup a single queue named **default**, `See defaults.yaml <https://github.com/978inc/celery-formula/blob/master/celery/defaults.yaml>`_ for a more complete example.
