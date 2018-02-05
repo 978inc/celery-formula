@@ -99,7 +99,7 @@ worker-bootstrap:
 # 
 {{ celery.service }}-service:
   file.managed:
-    - name: /lib/systemd/system/{{ celery.service }}.service
+    - name: /etc/systemd/system/{{ celery.service }}.service
     - source: salt://celery/files/celery-service.jinja
     - template: jinja
     - user: root
