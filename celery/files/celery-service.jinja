@@ -33,15 +33,15 @@ Group={{ user|default('celery')  }}
 EnvironmentFile=/etc/default/{{ service_name }}
 WorkingDirectory={{ working_dir }}/
 
-ExecStart=/bin/sh -c '{{ cmd }} multi start {{ queue_names|join(" ") }}  {{ celeryd_opts }} \
+ExecStart={{ cmd }} multi start {{ queue_names|join(" ") }}  {{ celeryd_opts }} \
 --pidfile={{ celery.run_dir }}/{{ celery.service }}-%n.pid \
 --loglevel={{ celery.log_level }} \
 --logfile={{ celery.log_dir }}/{{ celery.service }}-%n%I.log \
 --statedb={{ celery.run_dir }}/%n.state \
 --workdir={{ working_dir }} \
---config={{ celery.config_module }}'
+--config={{ celery.config_module }}
 
-ExecStop=/bin/sh -c '{{ cmd }} multi stopwait {{ queue_names|join(" ") }}  --pidfile={{ celery.run_dir }}/{{ celery.service }}-%n.pid '
+ExecStop={{ cmd }} multi stopwait {{ queue_names|join(" ") }}  --pidfile={{ celery.run_dir }}/{{ celery.service }}-%n.pid 
 {% endwith %}
 
 [Install]
