@@ -117,18 +117,12 @@ worker-bootstrap:
         celeryd_opts: {{ celeryd_opts|join(' ') }}
 #
 {{ celery.service }}:
-  file.symlink:
-    - name: /etc/systemd/system/{{ celery.service }}.service
-    - target: /lib/systemd/system/{{ celery.service }}.service
-    - force: true
-    - require:
-        - file: {{ celery.service }}-service
-        - file: {{ celery.service }}-configfile
   service.running:
     - enable: true
     - init_delay: 3
     - sig: celery
     - unmask: true
+    - unmask_runtime: true
     - watch:
         - file: {{ celery.service }}-service
         - file: {{ celery.service }}-defaults
