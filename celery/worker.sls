@@ -8,7 +8,7 @@ include:
 {% set config = celery.get('config', {}) %}
 {% set default_queue_cfg = config['worker'] %}
 
-{% set svc_file = "/lib/systemd/system/%s.service"|format(celery.service) %}
+{% set svc_file = "/etc/systemd/system/%s.service"|format(celery.service) %}
 {% set def_file = "/etc/default/%s"|format(celery.service) %}
 {% set cfg_file = "%s/%s.py"|format(celery.working_dir, celery.config_module) %}
 # svc_file => {{ svc_file }}
@@ -92,7 +92,6 @@ worker-bootstrap:
 # creating {{ def_file }} from templates in salt://files/celery or salt://celery/files
 {{ def_file }}:  
   file.managed:
-    - name: {{ def_file }}
     - source:
         - salt://files/celery/celery-defaults.jinja
         - salt://celery/files/celery-defaults.jinja
@@ -112,7 +111,6 @@ worker-bootstrap:
 # creating {{ svc_file }} from templates in salt://files/celery or salt://celery/files
 {{ svc_file }}:
   file.managed:
-    - name: {{ svc_file }}
     - source:
         - salt://files/celery/celery-service.jinja        
         - salt://celery/files/celery-service.jinja
