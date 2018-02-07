@@ -1,6 +1,10 @@
 ---
 driver:
   name: vagrant
+  cachier: true
+  require_chef_omnibus: latest
+  customize:
+    memory: 2048
 
 verifier:
   name: inspec
@@ -38,7 +42,7 @@ platforms:
   #     box: bento/centos-7.4
   - name: ubuntu
     driver:
-      box: bento/ubuntu-17.04
+      box: bento/ubuntu-16.04
 
 suites:
   - name: default

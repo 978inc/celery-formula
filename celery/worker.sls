@@ -8,10 +8,14 @@ include:
 {% set config = celery.get('config', {}) %}
 {% set default_queue_cfg = config['worker'] %}
 
-
+{% set svc_file = "/etc/systemd/system/%s.service"|format(celery.service) %}
+{% set def_file = "/etc/default/%s"|format(celery.service) %}
+{% set cfg_file = "%s/%s.py"|format(celery.working_dir, celery.config_module) %}
+# svc_file => {{ svc_file }}
 
 # build up a map of dicts, each representing a celery worker queue
 {% set queue_config = {} %}
+
 # build up a list of options to pass the celery daemon
 {% set celeryd_opts = ['-c 1'] %}
 
@@ -32,13 +36,15 @@ include:
 {% endif %}
 
 {% endfor %}
-
 # EOF worker_queues
+# queue_config => {{ queue_config }}
 
-worker-bootstrap:
+# assert user {{ celery.user }} exists
+celery-user-{{ celery.user }}:
   group.present:
     - name: {{ celery.user }}
-    - unless: getent passwd {{ celery.user }}
+    - unless:
+        - getent passwd {{ celery.user }}
   user.present:
     - name: {{ celery.user }}
     - fullname: "Celery Service"
@@ -47,9 +53,13 @@ worker-bootstrap:
     - gid_from_name: true
     - groups:
         - {{ celery.user }}
-    - unless: getent passwd {{ celery.user }}
+    - unless:
+        - getent passwd {{ celery.user }}
     - require:
-        - group: worker-bootstrap
+        - group: celery-user-{{ celery.user }}
+
+# Creating celery related dirs
+worker-bootstrap:
   file.directory:
     - names:
         - {{ celery.run_dir }}
@@ -60,17 +70,18 @@ worker-bootstrap:
     - mode: 775
     - makedirs: true
     - require:
-        - user: worker-bootstrap
+        - user: celery-user-{{ celery.user }}
     - recurse:
         - user
         - mode
         - group
 
-#
-{{ celery.service }}-configfile:
+# creating {{ cfg_file }} from templates in salt://files/celery or salt://celery/files 
+{{ cfg_file }}:
   file.managed:
-    - name: {{ celery.working_dir }}/{{ celery.config_module }}.py
-    - source: salt://celery/files/celery-config.jinja
+    - source:
+        - salt://files/celery/celery-config.jinja
+        - salt://celery/files/celery-config.jinja
     - user: {{ celery.user }}
     - group: {{ celery.user }}
     - mode: 644
@@ -78,11 +89,12 @@ worker-bootstrap:
     - context:
         queue_config: {{ queue_config }}
 
-#
-{{ celery.service }}-defaults:
+# creating {{ def_file }} from templates in salt://files/celery or salt://celery/files
+{{ def_file }}:  
   file.managed:
-    - name: /etc/default/{{ celery.service }}
-    - source: salt://celery/files/celery-defaults.jinja
+    - source:
+        - salt://files/celery/celery-defaults.jinja
+        - salt://celery/files/celery-defaults.jinja
     - template: jinja
     - user: root
     - mode: 644
@@ -96,17 +108,18 @@ worker-bootstrap:
         celeryd_opts: {{ celeryd_opts|join(' ') }}
         queue_config: {{ queue_config }}
 
-# 
-{{ celery.service }}-service:
+# creating {{ svc_file }} from templates in salt://files/celery or salt://celery/files
+{{ svc_file }}:
   file.managed:
-    - name: /lib/systemd/system/{{ celery.service }}.service
-    - source: salt://celery/files/celery-service.jinja
+    - source:
+        - salt://files/celery/celery-service.jinja        
+        - salt://celery/files/celery-service.jinja
     - template: jinja
     - user: root
     - group: root
     - mode: 644
     - require:
-        - user: worker-bootstrap
+        - user: celery-user-{{ celery.user }}
         - file: worker-bootstrap
     - context:
         user: {{ celery.user }}
@@ -115,23 +128,17 @@ worker-bootstrap:
         queue_config: {{ queue_config }}
         total_workers: {{ worker_queues|length }}
         celeryd_opts: {{ celeryd_opts|join(' ') }}
-#
+
+# activating service =>  {{ celery.service }}
 {{ celery.service }}:
-  file.symlink:
-    - name: /etc/systemd/system/{{ celery.service }}.service
-    - target: /lib/systemd/system/{{ celery.service }}.service
-    - force: true
-    - require:
-        - file: {{ celery.service }}-service
-        - file: {{ celery.service }}-configfile
   service.running:
     - enable: true
     - init_delay: 3
     - sig: celery
     - unmask: true
+    - unmask_runtime: true
     - watch:
-        - file: {{ celery.service }}-service
-        - file: {{ celery.service }}-defaults
-        - file: {{ celery.service }}-configfile
-#
+        - file: {{ cfg_file }}
+        - file: {{ def_file }}
+        - file: {{ svc_file }}
 {% endwith %}
