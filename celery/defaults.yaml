@@ -44,7 +44,6 @@ connection:
 failover_strategy: ~
 heartbeat: ~
 login_method: ~
-pool_limit: ~
 use_ssl: ~
 {% endload %}
 ## EOF Broker
