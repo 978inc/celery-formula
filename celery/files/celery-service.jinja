@@ -1,24 +1,24 @@
 #!jinja
 # This file is managed by Saltstack, any changes will be overwritten!!
-{% from "celery/map.jinja" import celery with context -%}
-
-{% set queue_names = [] %}
-{% for i in celery['worker_queues'] %}
-{% do queue_names.append(i.get('name', 'default')) %}
-{% endfor %}
-
-{% set prefix = celery.prefix -%}
-{% if celery.bin_env != '/usr' -%}
-{% set prefix = celery.bin_env -%}
-{% endif %}
+{#
+These are the variables passed into this template
+        user: {{ user }}
+        working_dir: {{ celery.working_dir }}
+        run_dir: {{ celery.run_dir }}
+        log_dir: {{ celery.log_dir }}
+        log_level: {{ celery.get('log_level', 'WARNING') }}
+        service_name: {{ celery.service  }}
+        
+        queue_names: {{ queue_config.keys() }}
+        queue_config: {{ queue_config  }}
+        total_workers: {{ worker_queues|length }}
+        celeryd_opts: {{ celeryd_opts|join(' ') }}
+        config_module: {{ celery.config_module }}
+        config: {{ celery.config }}
+        prefix: {{ celery.prefix }}
+#}
 
 {% set cmd = "%s/bin/celery" % prefix -%}
-{% set FLAGS = [
-  "--pidfile={{ celery.run_dir }}/{{ celery.service }}-%n.pid"
-  "--loglevel={{ celery.log_level }}",
-  "--logfile={{ celery.log_dir }}/{{ celery.service }}-%n%I.log",
-  "--statedb={{ celery.run_dir }}/{{ celery.service }}/%n.state "
-  ]|join(" ") -%}
 
 [Unit]
 Description=Celery Worker Daemon - {{ service_name|upper|replace("-", "_") }}
@@ -27,21 +27,21 @@ Wants=network-online.target
 
 [Service]
 Type=forking
-{%- with workers = queue_config.keys()|join(' ') %}
-User={{ user|default('celery') }}
-Group={{ user|default('celery')  }}
+{%- with workers = queue_names|join(' ') %}
+User={{ user }}
+Group={{ user }}
 EnvironmentFile=/etc/default/{{ service_name }}
 WorkingDirectory={{ working_dir }}/
 
 ExecStart={{ cmd }} multi start {{ queue_names|join(" ") }}  {{ celeryd_opts }} \
---pidfile={{ celery.run_dir }}/{{ celery.service }}-%n.pid \
---loglevel={{ celery.log_level }} \
---logfile={{ celery.log_dir }}/{{ celery.service }}-%n%I.log \
---statedb={{ celery.run_dir }}/%n.state \
+--pidfile={{ run_dir }}/{{ service_name }}-%n.pid \
+--loglevel={{ log_level }} \
+--logfile={{ log_dir }}/{{ service_name }}-%n%I.log \
+--statedb={{ run_dir }}/%n.state \
 --workdir={{ working_dir }} \
---config={{ celery.config_module }}
+--config={{ config_module }}
 
-ExecStop={{ cmd }} multi stopwait {{ queue_names|join(" ") }}  --pidfile={{ celery.run_dir }}/{{ celery.service }}-%n.pid 
+ExecStop={{ cmd }} multi stopwait {{ queue_names|join(" ") }}  --pidfile={{ run_dir }}/{{ service_name }}-%n.pid 
 {% endwith %}
 
 [Install]

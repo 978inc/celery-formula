@@ -1,3 +1,4 @@
+#!jinja
 {% from "celery/defaults.yaml" import lookup_map, default_config as dc with context %}
 
 {% set _grains = salt['grains.get']('celery:lookup', {}) %}

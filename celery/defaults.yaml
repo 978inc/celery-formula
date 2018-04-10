@@ -1,3 +1,4 @@
+#!jinja|yaml
 {% load_yaml as lookup_map %}
 default:
   version: '4.1.0'
@@ -118,11 +119,11 @@ serializer: ~
 # Using the above jinja variables, we 
 ##
 {% load_yaml as default_config %}
-beat: {{ beat_defaults }}
-broker: {{ broker_defaults }}
-worker: {{ worker_defaults }}
-task: {{ task_defaults }}
-result: {{ result_defaults }}
+beat: {{ beat_defaults | json }}
+broker: {{ broker_defaults | json }}
+worker: {{ worker_defaults | json }}
+task: {{ task_defaults | json }}
+result: {{ result_defaults | json }}
 
 # Any keys in this section will be treated as top level keys and will not be collapsed
 enable_utc: true

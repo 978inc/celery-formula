@@ -1,26 +1,23 @@
-{% from "celery/map.jinja" import celery with context -%}
+#!jinja
+{% from "celery/map.jinja" import celery with context %}
 {% from "celery/macros.sls" import render_config, displayer with context -%}
-
-
-CELERY_CONFIG_MODULE = "{{ celery.config_module }}"
-
+CELERY_CONFIG_MODULE = "{{ config_module }}"
 CELERYD_USER = "{{ celery.user }}"
 CELERYD_GROUP = "{{ celery.user }}"
-
-CELERYD_PID_FILE = "{{ celery.run_dir  }}/{{ celery.service }}-%n.pid"
-CELERYD_LOG_FILE = "{{ celery.log_dir }}/{{ celery.service }}-%n%I.log"
-CELERYD_LOG_LEVEL = "{{ celery.log_level }}"
-CELERYD_STATE_FILE = "{{ celery.run_dir }}/{{ celery.service }}/%n.state"
-CELERYD_CHDIR = "{{ celery.working_dir }}"
+CELERYD_PID_FILE = "{{ run_dir  }}/{{ service_name }}-%n.pid"
+CELERYD_LOG_FILE = "{{ log_dir }}/{{ service_name }}-%n%I.log"
+CELERYD_LOG_LEVEL = "{{ log_level }}"
+CELERYD_STATE_FILE = "{{ run_dir }}/{{ service_name }}/%n.state"
+CELERYD_CHDIR = "{{ working_dir }}"
 CELERYD_CREATE_DIRS = 1
 CELERY_CREATE_RUNDIR = 1
 CELERY_CREATE_LOGDIR = 1
 CELERYD_MULTI = "multi"
-CELERYD_NODES = "{{ queue_config.keys()|join(' ')}}"
-CELERY_BIN = "{{ celery.prefix }}/bin/celery"
+CELERYD_NODES = "{{ queue_names|join(' ') }}"
+CELERY_BIN = "{{ prefix }}/bin/celery"
 
 
 
-{% for section, data in celery.config.items() %}
+{% for section, data in config.items() %}
 {{render_config(section, data)}}
 {% endfor %}
