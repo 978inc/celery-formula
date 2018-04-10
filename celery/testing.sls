@@ -1,3 +1,4 @@
+#!yaml
 redis:
   pkg.installed:
     - pkgs:

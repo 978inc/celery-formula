@@ -1,3 +1,4 @@
+#!jinja|yaml
 {% from "celery/map.jinja" import celery with context %}
 {% from 'celery/macros.sls' import render_config %}
 
