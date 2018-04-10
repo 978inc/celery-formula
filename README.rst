@@ -2,6 +2,11 @@
 celery-Formula
 ==============
 
+
+.. image:: https://img.shields.io/travis/978inc/celery-formula.svg
+   :alt: Build Status
+
+
 Formula to setup and configure `celery` to be run as a daemon
 
 .. note::
