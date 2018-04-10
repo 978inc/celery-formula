@@ -9,4 +9,9 @@ script:
   - bundle exec kitchen test
 env:
   matrix:
+    - DISTRIB=debian:jessie/8
+    - DISTRIB=debian:stretch/9
     - DISTRIB=ubuntu:xenial/16.04
+    - LANG=en_US.UTF-8
+    - LANGUAGE en_US:en
+    - LC_ALL=en_US.UTF-8
