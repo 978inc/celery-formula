@@ -1,26 +1,27 @@
+
 # Managed by Saltstack, changes will be lost
-{% from "celery/map.jinja" import celery, config with context %}
+{% from "celery/map.jinja" import celery with context %}
 ENABLED="true"
-CELERY_CONFIG_MODULE="{{ celery.config_module }}"
+CELERY_CONFIG_MODULE="{{ config_module }}"
 
 CELERYD_USER="{{ celery.user }}"
 CELERYD_GROUP="{{ celery.user }}"
 
-CELERYD_PID_FILE="{{ celery.run_dir  }}/{{ celery.service }}-%n.pid"
-CELERYD_LOG_FILE="{{ celery.log_dir }}/{{ celery.service }}-%n%I.log"
-CELERYD_LOG_LEVEL="{{ celery.log_level }}"
-CELERYD_STATE_FILE="{{ celery.run_dir }}/{{ celery.service }}/%n.state"
-CELERYD_CHDIR="{{ celery.working_dir }}"
+CELERYD_PID_FILE="{{ run_dir  }}/{{ celery.service }}-%n.pid"
+CELERYD_LOG_FILE="{{ log_dir }}/{{ celery.service }}-%n%I.log"
+CELERYD_LOG_LEVEL="{{ log_level }}"
+CELERYD_STATE_FILE="{{ run_dir }}/{{ celery.service }}/%n.state"
+CELERYD_CHDIR="{{ working_dir }}"
 CELERYD_CREATE_DIRS=1
 CELERY_CREATE_RUNDIR=1
 CELERY_CREATE_LOGDIR=1
 CELERYD_MULTI="multi"
-CELERYD_NODES="{% for i in celery['worker_queues'] %}{{ i.get('name', 'default') }} {% endfor %}"
+CELERYD_NODES="{{ queue_names|join(' ') }}"
 {% if celeryd_opts is defined -%}
 CELERYD_OPTS="{{ celeryd_opts }}"
 {% else -%}
 CELERYD_OPTS=""
 {% endif %}
 
-CELERY_BIN="{{ celery.prefix }}/bin/celery"
+CELERY_BIN="{{ prefix }}/bin/celery"
 
