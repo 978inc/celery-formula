@@ -7,17 +7,6 @@ driver:
   name: docker
   use_sudo: false
   privileged: true
-# driver:
-#   name: vagrant
-#   cachier: true
-#   require_chef_omnibus: latest
-#   customize:
-#     memory: 2048
-
-driver_config:
-  hostname: celery-formula.ci.local
-  use_sudo: false
-  privileged: true
   require_chef_omnibus: false
   
 verifier:
@@ -64,8 +53,12 @@ platforms:
 
 suites:
   - name: default
+    driver_config:
+      hostname: celery-default.ci.local
 
   - name: worker
+    driver_config:
+      hostname: celery-worker.ci.local
     verifier:
       patterns:
         - tests/integration/default/
@@ -83,6 +76,8 @@ suites:
       patterns:
         - tests/integration/default/
         - tests/integration/flower/
+    driver_config:
+      hostname: celery-flower.ci.local
     provisioner:
       state_top:
         base:
