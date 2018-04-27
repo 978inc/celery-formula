@@ -52,6 +52,7 @@ celery-install:
     - pkgs:
         - 'celery=={{ celery.version }}'
     - bin_env: {{ prefix }}
+    - no_cache_dir: true
     - require:
         - pip: celery-deps
 
