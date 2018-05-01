@@ -11,10 +11,8 @@ celery-deps:
     - pkgs:
         - python-pip
         - python-setuptools
-  pip.installed:
-    - name: pip
-    - upgrade: true
-      
+    - unless:
+        - test -x pip
 
 {% if celery.from_source %}
 celery-bootstrap:
@@ -48,13 +46,10 @@ celery-install:
 
 # install using pip in {{ prefix }} 
 celery-install:
-  pip.installed:
-    - pkgs:
-        - 'celery=={{ celery.version }}'
-    - bin_env: {{ prefix }}
-    - no_cache_dir: true
+  cmd.run:
+    - name: |
+        {{ prefix }}/bin/pip install celery=={{ celery.version }}
     - require:
-        - pip: celery-deps
-
+        - pkg: celery-deps
 {% endwith %}
 {% endif %}
